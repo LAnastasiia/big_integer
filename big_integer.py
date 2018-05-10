@@ -8,6 +8,7 @@ class BigInteger:
     Each digit is assigned to separate node.
     """
     def __init__(self, initValue="0"):
+        assert initValue.isdigit(), "Error. initValue must contain only digits."
         # Reversed string of digits.
         self.initValue = str(initValue)[::-1]
         # Initialise head.
@@ -299,12 +300,19 @@ class BigInteger:
             return new_BigInt
 
     def _fix_zeros(self):
+        """
+        Delete trash zeroes at the beginning of the BigInteger.
+        """
         node = self.tail
         while node.digit == 0:
             self.tail = node.prev
             node = node.prev
 
     def __floordiv__(self, other):
+        """
+        Method for mod dividing (without rest).
+        Implementation of // operator.
+        """
         res = 0
         sum_try = self - other
         sum_try._fix_zeros()
@@ -315,8 +323,19 @@ class BigInteger:
         return res
 
     def __pow__(self, degree):
-
-
+        """
+        Method for powering self to degree. Implementation of ** operator.
+        """
+        node2 = degree.head
+        count = 1
+        new_BigInt = BigInteger("1")
+        while node2 is not None:
+            degree = node2.digit*count
+            for i in range(degree):
+                new_BigInt *= self
+            count *= 10
+            node2 = node2.next
+        return new_BigInt
 
 
 class DigitNode:
@@ -342,8 +361,8 @@ class DigitNode:
         return str(self.digit)
 
 
-bi = BigInteger('123')
-b2 = BigInteger('3311')
+bi = BigInteger('11')
+b2 = BigInteger('11')
 print(bi < b2)
 print(bi)
-bi // b2
+print(bi ** b2)
