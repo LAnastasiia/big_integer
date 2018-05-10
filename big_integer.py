@@ -1,5 +1,7 @@
 # File: big_integer.py
 # This module contains implementation of BigInteger and DigitNode classes.
+# !!! FIXED VERSION OF THIS PROGRAM IS AVAILABLE ON GitHub:
+# https://github.com/LAnastasiia/big_integer/
 
 
 class BigInteger:
@@ -11,10 +13,6 @@ class BigInteger:
         assert initValue.isdigit() or \
             (initValue[0] == '-' and initValue[1:].isdigit()), \
                 "Error. initValue must contain only digits."
-        if initValue[0] == '-':
-            self._is_positive = False
-        else:
-            self._is_positive = True
 
         # Reversed string of digits.
         self.initValue = str(initValue)[::-1]
@@ -30,6 +28,7 @@ class BigInteger:
             self.tail.next = newnode
             self.tail = newnode
             self.tail.next = None
+
         if initValue != "0":
             self._fix_zeros()
 
@@ -37,7 +36,7 @@ class BigInteger:
         """
         Represent big integer as a string for printing it out.
         """
-        res_str = '' if self._is_positive == True else '- '
+        res_str = ''
         node = self.tail
         while node is not None:
             res_str += str(node) + ' '
@@ -203,10 +202,13 @@ class BigInteger:
             new_BigInt._add_to_structure(new_node)
         return new_BigInt
 
+
     def __mul__(self, other):
         """
         Implementation of * operator for two big integers.
+        Precondition: works only with numbers without 0.
         """
+        print(self, other)
         node1 = self.head
         res_list = []  # List for results of digit*big_int miltiplicatoin.
         count_fr_zero = 0
@@ -255,30 +257,13 @@ class BigInteger:
         """
         Substraction method. Implementation of - operator for big integers.
         """
-        if self < other:
-            res = other.__sub__(self)
-            res._is_positive = False
 
+        if self < other:
+            res = other - self
             return res
         elif other == self:
             return 0
         else:
-            if self._is_positive == True and other._is_positive == False:
-                other._is_positive = True
-                new_BigInt = self + other
-                new_BigInt._is_positive = True
-                return new_BigInt
-
-            elif self._is_positive == False and other._is_positive == True:
-                self._is_positive = True
-                new_BigInt = self + other
-                new_BigInt._is_positive = False
-                return new_BigInt
-
-            elif self._is_positive == False and other._is_positive == False:
-                other._is_positive == True
-                new_BigInt = other - self
-                return new_BigInt
 
             # Add 0-s to the beginning of smaller big integer.
             both_big_int = [self, other]
@@ -286,6 +271,7 @@ class BigInteger:
             for bi in both_big_int:
                 for _ in range(len(longest)-len(bi)):
                     bi._add_to_structure(DigitNode(0))
+            print("s", self, other)
             # Initialise node1 and node2.
             node1 = self.head
             node2 = other.head
@@ -297,11 +283,12 @@ class BigInteger:
                 if digit_sub < 0 and node1.next is not None:
                     digit_sub = (node1.digit + 10) - node2.digit
                     next_node = node1.next  # For taking dec from next digit.
-                    # If next digit is 0.
-                    count = 0
+                    # # If next digit is 0.
+                    # count = 0
                     while next_node == 0:
                         next_node.digit = 9
-                        count += 1
+                        next_node = next_node.next
+                        # count += 1
                     # Take dec from next non-zero digit
                     next_node.digit -= 1
 
@@ -310,7 +297,7 @@ class BigInteger:
                 # Move to next nodes.
                 node1 = node1.next
                 node2 = node2.next
-
+            print("s", self, other)
             if node1 is not None:
                 while node1 is not None:
                     new_BigInt._add_to_structure(node1)
@@ -327,7 +314,7 @@ class BigInteger:
         Delete trash zeroes at the beginning of the BigInteger.
         """
         node = self.tail
-        while node.digit == 0:
+        while node.digit == 0 and node is not None:
             self.tail = node.prev
             self.tail.next = None
             node = node.prev
@@ -338,20 +325,20 @@ class BigInteger:
         Implementation of // operator.
         """
         res = 0
-        sum_try = self - other
-        res += 1
-        sum_try._fix_zeros()
         other._fix_zeros()
-        while sum_try > other:
+        # sum_try = self - other
+        # sum_try._fix_zeros()
+        while self > other:
+            self._fix_zeros()
+            self -= other
             res += 1
-            sum_try -= other
-            sum_try._fix_zeros()
         return res
 
     def __pow__(self, degree):
         """
         Method for powering self to degree. Implementation of ** operator.
         """
+
         node2 = degree.head
         count = 1
         new_BigInt = BigInteger("1")
@@ -368,13 +355,14 @@ class BigInteger:
         Method for mod division. Implementation of % operator.
         """
         res = 0
-        sum_try = self - other
-        sum_try._fix_zeros()
-        while sum_try > other:
+        other._fix_zeros()
+        # sum_try = self - other
+        # sum_try._fix_zeros()
+        while self > other:
+            self._fix_zeros()
+            self -= other
             res += 1
-            sum_try -= other
-            sum_try._fix_zeros()
-        return sum_try
+        return self
 
 
 class DigitNode:
@@ -399,12 +387,15 @@ class DigitNode:
         """
         return str(self.digit)
 
+if __name__ == "__main__":
+    bi = BigInteger('164')
+    b2 = BigInteger('7')
+    print(bi, b2)
+    # print("sum", bi + b2)
+    # print(b2, bi)
+    print("sub", bi - b2)
+    # print(b2, bi)
 
-bi = BigInteger('123')
-b2 = BigInteger('11')
-print(bi + b2)
-print(bi - b2)
-print(b2 - bi)
-print(bi * b2)
-print(bi // b2)
-print(bi % b2)
+    # print("mul", b2 * bi)
+    # print("div", bi // b2)
+    # print("mod", bi % b2)
