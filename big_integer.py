@@ -8,7 +8,14 @@ class BigInteger:
     Each digit is assigned to separate node.
     """
     def __init__(self, initValue="0"):
-        assert initValue.isdigit(), "Error. initValue must contain only digits."
+        assert initValue.isdigit() or \
+            (initValue[0] == '-' and initValue[1:].isdigit()), \
+                "Error. initValue must contain only digits."
+        if initValue[0] == '-':
+            self._is_positive = False
+        else:
+            self._is_positive = True
+
         # Reversed string of digits.
         self.initValue = str(initValue)[::-1]
         # Initialise head.
@@ -30,7 +37,7 @@ class BigInteger:
         """
         Represent big integer as a string for printing it out.
         """
-        res_str = ''
+        res_str = '' if self._is_positive == True else '- '
         node = self.tail
         while node is not None:
             res_str += str(node) + ' '
@@ -71,10 +78,10 @@ class BigInteger:
             return 1
         elif len(self) < len(other):
             return -1
-        else:
+        elif len(self) == len(other):
             node1 = self.tail
             node2 = other.tail
-            while node1 is not None:
+            while node1 is not None and node2 is not None:
                 if node1.digit > node2.digit:
                     return 1
                 elif node1.digit < node2.digit:
@@ -232,6 +239,7 @@ class BigInteger:
 
         for bi in res_list:
             res += bi
+        res._fix_zeros()
         return res
 
     def _add_to_structure_front(self, digit_node):
@@ -249,14 +257,29 @@ class BigInteger:
         """
         if self < other:
             res = other.__sub__(self)
-            minus_one = DigitNode(-1)
-            minus = BigInteger()
-            minus._add_to_structure(minus_one)
-            res *= minus
+            res._is_positive = False
+
             return res
         elif other == self:
             return 0
         else:
+            if self._is_positive == True and other._is_positive == False:
+                other._is_positive = True
+                new_BigInt = self + other
+                new_BigInt._is_positive = True
+                return new_BigInt
+
+            elif self._is_positive == False and other._is_positive == True:
+                self._is_positive = True
+                new_BigInt = self + other
+                new_BigInt._is_positive = False
+                return new_BigInt
+
+            elif self._is_positive == False and other._is_positive == False:
+                other._is_positive == True
+                new_BigInt = other - self
+                return new_BigInt
+
             # Add 0-s to the beginning of smaller big integer.
             both_big_int = [self, other]
             longest = max(both_big_int, key=len)
@@ -306,16 +329,19 @@ class BigInteger:
         node = self.tail
         while node.digit == 0:
             self.tail = node.prev
+            self.tail.next = None
             node = node.prev
 
     def __floordiv__(self, other):
         """
-        Method for mod dividing (without rest).
+        Method for floor dividing (without rest).
         Implementation of // operator.
         """
         res = 0
         sum_try = self - other
+        res += 1
         sum_try._fix_zeros()
+        other._fix_zeros()
         while sum_try > other:
             res += 1
             sum_try -= other
@@ -336,6 +362,19 @@ class BigInteger:
             count *= 10
             node2 = node2.next
         return new_BigInt
+
+    def __mod__(self, other):
+        """
+        Method for mod division. Implementation of % operator.
+        """
+        res = 0
+        sum_try = self - other
+        sum_try._fix_zeros()
+        while sum_try > other:
+            res += 1
+            sum_try -= other
+            sum_try._fix_zeros()
+        return sum_try
 
 
 class DigitNode:
@@ -361,8 +400,11 @@ class DigitNode:
         return str(self.digit)
 
 
-bi = BigInteger('11')
+bi = BigInteger('123')
 b2 = BigInteger('11')
-print(bi < b2)
-print(bi)
-print(bi ** b2)
+print(bi + b2)
+print(bi - b2)
+print(b2 - bi)
+print(bi * b2)
+print(bi // b2)
+print(bi % b2)
