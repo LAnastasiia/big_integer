@@ -14,6 +14,12 @@ class BigInteger:
             (initValue[0] == '-' and initValue[1:].isdigit()), \
                 "Error. initValue must contain only digits."
 
+        if initValue[0] == '-':
+            initValue = initValue[1:]
+            self._is_positive = False
+        else:
+            self._is_positive = True
+
         # Reversed string of digits.
         self.initValue = str(initValue)[::-1]
         # Initialise head.
@@ -36,7 +42,7 @@ class BigInteger:
         """
         Represent big integer as a string for printing it out.
         """
-        res_str = ''
+        res_str = '' if self._is_positive == True else '- '
         node = self.tail
         while node is not None:
             res_str += str(node) + ' '
@@ -71,6 +77,8 @@ class BigInteger:
         Compare big integer with another big integer. This method is used for
         later implementation of <, <=, >, >=, ==, != operators.
         """
+        if self._is_positive == False or other._is_positive == False:
+            raise ValueError("Invalid operands. Must be positive.")
         self._fix_zeros()
         other._fix_zeros()
         if len(self) > len(other):
@@ -158,6 +166,9 @@ class BigInteger:
         """
         Implementation of + operator for two big integers.
         """
+        if self._is_positive == False or other._is_positive == False:
+            raise ValueError("Invalid operands. Must be positive.")
+
         # Add 0-s to the beginning of smaller big integer.
         both_big_int = [self, other]
         longest = max(both_big_int, key=len)
@@ -206,8 +217,9 @@ class BigInteger:
     def __mul__(self, other):
         """
         Implementation of * operator for two big integers.
-        Precondition: works only with numbers without 0.
         """
+        if self._is_positive == False or other._is_positive == False:
+            raise ValueError("Invalid operands. Must be positive.")
         node1 = self.head
         res_list = []  # List for results of digit*big_int miltiplicatoin.
         count_fr_zero = 0
@@ -256,6 +268,9 @@ class BigInteger:
         """
         Substraction method. Implementation of - operator for big integers.
         """
+        if self._is_positive == False or other._is_positive == False:
+            raise ValueError("Invalid operands. Must be positive.")
+
         if self < other:
             res = other - self
             return res
@@ -287,10 +302,13 @@ class BigInteger:
                     minus_dec = 0
 
                 if digit_sub < 0 and node1.next is not None:
+
                     digit_sub = (node1.digit + 10) - node2.digit
                     next_node = node1.next  # For taking dec from next digit.
+
                     # # If next digit is 0.
-                    while next_node == 0:
+                    while next_node.digit == 0:
+
                         # next_node.digit = 9
                         next_node = next_node.next
                         count += 1
@@ -329,22 +347,31 @@ class BigInteger:
         Method for floor dividing (without rest).
         Implementation of // operator.
         """
-        res = -1
+        if self._is_positive == False or other._is_positive == False:
+            raise ValueError("Invalid operands. Must be positive.")
+
+        res = 0
         other._fix_zeros()
         # sum_try = self - other
         # sum_try._fix_zeros()
         probe = self
         while probe > other:
-            print(probe)
             probe._fix_zeros()
             res += 1
             probe -= other
+
+        if probe >= other:
+            res += 1
+        print(probe)
         return res
 
     def __pow__(self, degree):
         """
         Method for powering self to degree. Implementation of ** operator.
         """
+        if self._is_positive == False or degree._is_positive == False:
+            raise ValueError("Invalid operands. Must be positive.")
+
         node2 = degree.head
         count = 1
         new_BigInt = BigInteger("1")
@@ -360,18 +387,21 @@ class BigInteger:
         """
         Method for mod division. Implementation of % operator.
         """
+        if self._is_positive == False or other._is_positive == False:
+            raise ValueError("Invalid operands. Must be positive.")
         res = 0
         other._fix_zeros()
         # sum_try = self - other
         # sum_try._fix_zeros()
         probe = self
-
-        while probe - other > other:
-            print(probe)
-            sub_try._fix_zeros()
-            probe -= other
+        while probe > other:
+            probe._fix_zeros()
             res += 1
-        return res
+            probe -= other
+        if probe >= other:
+            probe -= other
+        return probe
+
 
 class DigitNode:
     """
@@ -396,14 +426,12 @@ class DigitNode:
         return str(self.digit)
 
 if __name__ == "__main__":
-    bi = BigInteger('164')
-    b2 = BigInteger('72')
+    bi = BigInteger('172')
+    b2 = BigInteger('27')
     print(bi, b2)
     print("sum", bi + b2)
-
     print("sub", bi - b2)
-
-
-    print("mul", b2 * bi)
     print("div", bi // b2)
     print("mod", bi % b2)
+    print("mul", b2 * bi)
+    print("pow", bi ** b2)
