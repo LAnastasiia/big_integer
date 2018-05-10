@@ -22,6 +22,8 @@ class BigInteger:
             self.tail.next = newnode
             self.tail = newnode
             self.tail.next = None
+        if initValue != "0":
+            self._fix_zeros()
 
     def __str__(self):
         """
@@ -62,6 +64,8 @@ class BigInteger:
         Compare big integer with another big integer. This method is used for
         later implementation of <, <=, >, >=, ==, != operators.
         """
+        self._fix_zeros()
+        other._fix_zeros()
         if len(self) > len(other):
             return 1
         elif len(self) < len(other):
@@ -74,9 +78,9 @@ class BigInteger:
                     return 1
                 elif node1.digit < node2.digit:
                     return -1
-                else:
-                    node1 = node1.prev
-                    node2 = node2.prev
+
+                node1 = node1.prev
+                node2 = node2.prev
             return 0
 
     def __eq__(self, other):
@@ -300,6 +304,18 @@ class BigInteger:
             self.tail = node.prev
             node = node.prev
 
+    def __floordiv__(self, other):
+        res = 0
+        sum_try = self - other
+        sum_try._fix_zeros()
+        while sum_try > other:
+            res += 1
+            sum_try -= other
+            sum_try._fix_zeros()
+        return res
+
+    def __pow__(self, degree):
+
 
 
 
@@ -327,6 +343,7 @@ class DigitNode:
 
 
 bi = BigInteger('123')
-b2 = BigInteger('11')
-bi._fix_zeros()
+b2 = BigInteger('3311')
+print(bi < b2)
 print(bi)
+bi // b2
