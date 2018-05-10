@@ -208,7 +208,6 @@ class BigInteger:
         Implementation of * operator for two big integers.
         Precondition: works only with numbers without 0.
         """
-        print(self, other)
         node1 = self.head
         res_list = []  # List for results of digit*big_int miltiplicatoin.
         count_fr_zero = 0
@@ -257,47 +256,53 @@ class BigInteger:
         """
         Substraction method. Implementation of - operator for big integers.
         """
-
         if self < other:
             res = other - self
             return res
         elif other == self:
             return 0
         else:
-
             # Add 0-s to the beginning of smaller big integer.
             both_big_int = [self, other]
             longest = max(both_big_int, key=len)
             for bi in both_big_int:
                 for _ in range(len(longest)-len(bi)):
                     bi._add_to_structure(DigitNode(0))
-            print("s", self, other)
+
             # Initialise node1 and node2.
             node1 = self.head
             node2 = other.head
             new_BigInt = BigInteger()
+            count = 0
+            minus_dec = 0
 
             while node1 is not None and node2 is not None:
                 # Find sum of digits.
                 digit_sub = node1.digit - node2.digit
+                if count:
+                    digit_sub = 9
+                    count -= 1
+                elif minus_dec == 1:
+                    digit_sub -= 1
+                    minus_dec = 0
+
                 if digit_sub < 0 and node1.next is not None:
                     digit_sub = (node1.digit + 10) - node2.digit
                     next_node = node1.next  # For taking dec from next digit.
                     # # If next digit is 0.
-                    # count = 0
                     while next_node == 0:
-                        next_node.digit = 9
+                        # next_node.digit = 9
                         next_node = next_node.next
-                        # count += 1
+                        count += 1
                     # Take dec from next non-zero digit
-                    next_node.digit -= 1
+                    minus_dec = 1
+
 
                 new_node = DigitNode(digit_sub)
                 new_BigInt._add_to_structure(new_node)
                 # Move to next nodes.
                 node1 = node1.next
                 node2 = node2.next
-            print("s", self, other)
             if node1 is not None:
                 while node1 is not None:
                     new_BigInt._add_to_structure(node1)
@@ -324,21 +329,22 @@ class BigInteger:
         Method for floor dividing (without rest).
         Implementation of // operator.
         """
-        res = 0
+        res = -1
         other._fix_zeros()
         # sum_try = self - other
         # sum_try._fix_zeros()
-        while self > other:
-            self._fix_zeros()
-            self -= other
+        probe = self
+        while probe > other:
+            print(probe)
+            probe._fix_zeros()
             res += 1
+            probe -= other
         return res
 
     def __pow__(self, degree):
         """
         Method for powering self to degree. Implementation of ** operator.
         """
-
         node2 = degree.head
         count = 1
         new_BigInt = BigInteger("1")
@@ -358,12 +364,14 @@ class BigInteger:
         other._fix_zeros()
         # sum_try = self - other
         # sum_try._fix_zeros()
-        while self > other:
-            self._fix_zeros()
-            self -= other
-            res += 1
-        return self
+        probe = self
 
+        while probe - other > other:
+            print(probe)
+            sub_try._fix_zeros()
+            probe -= other
+            res += 1
+        return res
 
 class DigitNode:
     """
@@ -389,13 +397,13 @@ class DigitNode:
 
 if __name__ == "__main__":
     bi = BigInteger('164')
-    b2 = BigInteger('7')
+    b2 = BigInteger('72')
     print(bi, b2)
-    # print("sum", bi + b2)
-    # print(b2, bi)
-    print("sub", bi - b2)
-    # print(b2, bi)
+    print("sum", bi + b2)
 
-    # print("mul", b2 * bi)
-    # print("div", bi // b2)
-    # print("mod", bi % b2)
+    print("sub", bi - b2)
+
+
+    print("mul", b2 * bi)
+    print("div", bi // b2)
+    print("mod", bi % b2)
