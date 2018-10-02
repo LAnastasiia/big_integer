@@ -1,2 +1,2 @@
 # big_integer
-Implementation of BigInteger ADT using double-linked-list.
+Implementation of BigInteger ADT by double-linked list structure.
